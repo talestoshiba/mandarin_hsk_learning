@@ -13,6 +13,7 @@ An interactive web-based application for practicing Mandarin Chinese at HSK Leve
 - **Reverse Quiz** — Match pinyin and English definitions to Chinese characters.
 - **Sentence Quiz** — Practice with common HSK Level 1 sentences.
 - **Sentence Builder** — Self-paced exploration of sentence structure and pronunciation.
+- **Fill-in-the-Blank** — Grammar practice by filling missing characters in sentences.
 
 ### Learning Features
 - **Audio Pronunciation** — Native pronunciation for all characters and sentences.
