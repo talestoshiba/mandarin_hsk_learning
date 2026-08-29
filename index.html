@@ -389,6 +389,9 @@
 				<button class="btn btn-action" data-action="start-sentence-builder">
 					Sentence Practice — Read &amp; Listen
 				</button>
+				<button class="btn btn-action" data-action="start-fillblank-quiz">
+					Fill in the Blank — Grammar Practice
+				</button>
 				<button class="btn btn-neutral" data-action="show-vocabulary">
 					View Vocabulary List
 				</button>
@@ -456,6 +459,22 @@
 			<button class="btn btn-neutral btn-back" data-action="return-to-menu">Back to Menu</button>
 		</div>
 
+		<!-- Fill-in-the-Blank Quiz Screen -->
+		<div id="fillBlankQuizScreen" class="quiz-screen">
+			<div class="progress-bar"><div class="progress-fill" id="fillBlankProgress"></div></div>
+			<div class="question-title">Fill in the Blank</div>
+			<div class="question-area">
+				<div class="question-content" id="fillBlankSentence"></div>
+				<div class="english-text" id="fillBlankEnglish"></div>
+				<div class="audio-button-area">
+					<button class="btn-audio" data-action="replay-audio">Play Audio</button>
+				</div>
+			</div>
+			<div class="options-area" id="fillBlankOptions"></div>
+			<div id="fillBlankFeedback"></div>
+			<button class="btn btn-neutral btn-back" data-action="return-to-menu">Back to Menu</button>
+		</div>
+
 		<!-- Vocabulary Screen -->
 		<div id="vocabularyScreen" class="quiz-screen">
 			<h2 style="margin-bottom: 15px;">HSK 1 Vocabulary</h2>
@@ -508,6 +527,32 @@
 		{ chinese: '我在这里。', pinyin: 'wǒ zài zhè lǐ.', english: 'I am here.' },
 		{ chinese: '这很好。', pinyin: 'zhè hěn hǎo.', english: 'This is very good.' }
 	];
+
+	// Generate fill-in-the-blank questions dynamically from sentences
+	function generateFillBlankQuestions(sentencesArray) {
+		const punctuation = new Set(['。', '，', '？', '！']);
+		const questions = [];
+
+		sentencesArray.forEach(sentenceObj => {
+			const characters = [...sentenceObj.chinese].filter(char => !punctuation.has(char));
+
+			// Randomly select one character from the sentence to be the blank
+			if (characters.length > 0) {
+				const randomIndex = Math.floor(Math.random() * characters.length);
+				const charToBlank = characters[randomIndex];
+				const sentenceWithBlank = sentenceObj.chinese.replace(charToBlank, '___');
+
+				questions.push({
+					sentence: sentenceWithBlank,
+					blank: charToBlank,
+					fullSentence: sentenceObj.chinese,
+					english: sentenceObj.english
+				});
+			}
+		});
+
+		return questions;
+	}
 
 	const OPTIONS_PER_QUESTION = 4;
 	const FEEDBACK_DELAY_MS = 1500;
@@ -601,6 +646,8 @@
 		if (!question) return;
 		if (state.quizType === 'sentence' || state.quizType === 'builder') {
 			playSentenceAudio(question.chinese);
+		} else if (state.quizType === 'fillblank') {
+			playSentenceAudio(question.fullSentence);
 		} else {
 			playSingle(getAudioPath(question.pinyinFile));
 		}
@@ -640,6 +687,16 @@
 			matchKey: 'chinese',
 			renderOptionLabel: item => item.chinese,
 			onEnter: question => playSentenceAudio(question.chinese)
+		},
+		fillblank: {
+			screenId: 'fillBlankQuizScreen',
+			progressId: 'fillBlankProgress',
+			optionsId: 'fillBlankOptions',
+			feedbackId: 'fillBlankFeedback',
+			pool: vocabulary,
+			matchKey: 'chinese',
+			renderOptionLabel: item => `${item.chinese} (${item.pinyin})`,
+			onEnter: question => playSentenceAudio(question.fullSentence)
 		}
 	};
 
@@ -661,22 +718,46 @@
 		}
 
 		const question = state.questions[state.index];
-		const options = buildOptions(question, config.pool, config.matchKey);
-
 		updateProgress(state.index + 1, state.questions.length, config.progressId);
 
-		const optionsContainer = document.getElementById(config.optionsId);
-		clearChildren(optionsContainer);
-		options.forEach(option => {
-			const button = document.createElement('button');
-			button.className = 'option';
-			button.textContent = config.renderOptionLabel(option);
-			button.addEventListener('click', () => selectAnswer(option, question, config, button));
-			optionsContainer.appendChild(button);
-		});
+		// Special handling for fillblank quiz
+		if (state.quizType === 'fillblank') {
+			document.getElementById('fillBlankSentence').textContent = question.sentence;
+			document.getElementById('fillBlankEnglish').textContent = `Meaning: ${question.english}`;
 
-		document.getElementById(config.feedbackId).replaceChildren();
-		config.onEnter(question);
+			// Find the correct answer from vocabulary
+			const correctAnswer = config.pool.find(v => v.chinese === question.blank);
+			const options = buildOptions(correctAnswer, config.pool, config.matchKey);
+
+			const optionsContainer = document.getElementById(config.optionsId);
+			clearChildren(optionsContainer);
+			options.forEach(option => {
+				const button = document.createElement('button');
+				button.className = 'option';
+				button.textContent = config.renderOptionLabel(option);
+				button.addEventListener('click', () => selectAnswer(option, correctAnswer, config, button));
+				optionsContainer.appendChild(button);
+			});
+
+			document.getElementById(config.feedbackId).replaceChildren();
+			config.onEnter(question);
+		} else {
+			// Original logic for other quiz types
+			const options = buildOptions(question, config.pool, config.matchKey);
+
+			const optionsContainer = document.getElementById(config.optionsId);
+			clearChildren(optionsContainer);
+			options.forEach(option => {
+				const button = document.createElement('button');
+				button.className = 'option';
+				button.textContent = config.renderOptionLabel(option);
+				button.addEventListener('click', () => selectAnswer(option, question, config, button));
+				optionsContainer.appendChild(button);
+			});
+
+			document.getElementById(config.feedbackId).replaceChildren();
+			config.onEnter(question);
+		}
 	}
 
 	function selectAnswer(chosenOption, correctQuestion, config, button) {
@@ -774,6 +855,7 @@
 		'start-character-quiz': () => startQuiz('character', vocabulary),
 		'start-reverse-quiz': () => startQuiz('reverse', vocabulary),
 		'start-sentence-quiz': () => startQuiz('sentence', sentences),
+		'start-fillblank-quiz': () => startQuiz('fillblank', generateFillBlankQuestions(sentences)),
 		'start-sentence-builder': startSentenceBuilder,
 		'show-vocabulary': showVocabulary,
 		'return-to-menu': returnToMenu,
