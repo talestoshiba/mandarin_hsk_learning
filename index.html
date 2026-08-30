@@ -1,374 +1,556 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mandarin HSK 1 Learning Quiz</title>
-<style>
-	/* ---------- Design tokens ---------- */
-	:root {
-		--color-bg: #f5f5f5;
-		--color-surface: #ffffff;
-		--color-surface-alt: #f8f9fa;
-		--color-text: #333333;
-		--color-text-heading: #2c3e50;
-		--color-text-muted: #7f8c8d;
-		--color-border: #bdc3c7;
-		--color-divider: #ecf0f1;
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="Interactive quiz app for learning HSK Level 1 Mandarin Chinese with audio pronunciation and multiple practice modes">
+	<meta name="theme-color" content="#3498db">
+	<title>Mandarin HSK 1 Learning Quiz</title>
+	<style>
+		/* ========== Design Tokens ========== */
+		:root {
+			--color-bg: #f5f5f5;
+			--color-surface: #ffffff;
+			--color-surface-alt: #f8f9fa;
+			--color-text: #333333;
+			--color-text-heading: #2c3e50;
+			--color-text-muted: #7f8c8d;
+			--color-border: #bdc3c7;
+			--color-divider: #ecf0f1;
 
-		--color-primary: #3498db;
-		--color-primary-dark: #2980b9;
-		--color-neutral: #95a5a6;
-		--color-neutral-dark: #7f8c8d;
-		--color-audio: #9b59b6;
-		--color-audio-dark: #8e44ad;
+			--color-primary: #3498db;
+			--color-primary-dark: #2980b9;
+			--color-neutral: #95a5a6;
+			--color-neutral-dark: #7f8c8d;
+			--color-audio: #9b59b6;
+			--color-audio-dark: #8e44ad;
 
-		--color-success: #2ecc71;
-		--color-success-dark: #27ae60;
-		--color-success-bg: #d5f4e6;
-		--color-error: #e74c3c;
-		--color-error-dark: #c0392b;
-		--color-error-bg: #fadbd8;
+			--color-success: #2ecc71;
+			--color-success-dark: #27ae60;
+			--color-success-bg: #d5f4e6;
+			--color-error: #e74c3c;
+			--color-error-dark: #c0392b;
+			--color-error-bg: #fadbd8;
 
-		--radius-sm: 4px;
-		--radius-md: 6px;
-		--radius-lg: 8px;
+			--radius-sm: 4px;
+			--radius-md: 6px;
+			--radius-lg: 8px;
 
-		--space-xs: 8px;
-		--space-sm: 12px;
-		--space-md: 15px;
-		--space-lg: 20px;
+			--space-xs: 8px;
+			--space-sm: 12px;
+			--space-md: 15px;
+			--space-lg: 20px;
 
-		--transition-fast: 0.2s ease;
-		--transition-normal: 0.3s ease;
-	}
+			--transition-fast: 0.2s ease;
+			--transition-normal: 0.3s ease;
 
-	* {
-		margin: 0;
-		padding: 0;
-		box-sizing: border-box;
-	}
-
-	body {
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-		background-color: var(--color-bg);
-		color: var(--color-text);
-		padding: 10px;
-		min-height: 100vh;
-	}
-
-	.container {
-		max-width: 600px;
-		margin: 0 auto;
-		background-color: var(--color-surface);
-		border-radius: var(--radius-lg);
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		padding: var(--space-lg);
-		min-height: 100vh;
-		display: flex;
-		flex-direction: column;
-	}
-
-	h1 {
-		font-size: 24px;
-		margin-bottom: var(--space-xs);
-		text-align: center;
-		color: var(--color-text-heading);
-	}
-
-	.subtitle {
-		text-align: center;
-		color: var(--color-text-muted);
-		margin-bottom: var(--space-lg);
-		font-size: 14px;
-	}
-
-	/* ---------- Buttons: one consistent system ----------
-		btn-action	= primary interactive action (start a quiz, play audio, submit)
-		btn-neutral	= secondary/navigational action (back, view list)
-		btn-audio	= the pill-shaped audio trigger
-		Semantic color (success/error) is reserved ONLY for answer feedback,
-		never for menu navigation, so color always means the same thing. */
-	.btn {
-		display: block;
-		padding: 15px 20px;
-		font-size: 16px;
-		border: none;
-		border-radius: var(--radius-md);
-		cursor: pointer;
-		transition: background-color var(--transition-normal), transform var(--transition-normal);
-		text-align: center;
-		width: 100%;
-	}
-
-	.btn-action {
-		background-color: var(--color-primary);
-		color: white;
-	}
-
-	.btn-action:active {
-		background-color: var(--color-primary-dark);
-		transform: scale(0.98);
-	}
-
-	.btn-neutral {
-		background-color: var(--color-neutral);
-		color: white;
-	}
-
-	.btn-neutral:active {
-		background-color: var(--color-neutral-dark);
-		transform: scale(0.98);
-	}
-
-	.btn-back {
-		margin-top: var(--space-md);
-	}
-
-	.menu-section {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		gap: var(--space-md);
-	}
-
-	.quiz-screen {
-		display: none;
-	}
-
-	.quiz-screen.active {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.progress-bar {
-		width: 100%;
-		height: 6px;
-		background-color: var(--color-divider);
-		border-radius: 3px;
-		margin-bottom: var(--space-md);
-		overflow: hidden;
-	}
-
-	.progress-fill {
-		height: 100%;
-		background-color: var(--color-primary);
-		transition: width var(--transition-normal);
-	}
-
-	.question-area {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		gap: var(--space-md);
-		margin-bottom: var(--space-md);
-		text-align: center;
-	}
-
-	.question-title {
-		font-size: 18px;
-		color: var(--color-text-muted);
-	}
-
-	.question-content {
-		font-size: 28px;
-		color: var(--color-text-heading);
-		font-weight: bold;
-		margin: var(--space-md) 0;
-		line-height: 1.6;
-	}
-
-	.pinyin-text {
-		font-size: 18px;
-		color: var(--color-primary);
-		margin: 10px 0;
-	}
-
-	.english-text {
-		font-size: 16px;
-		color: var(--color-text-muted);
-		font-style: italic;
-		margin: 8px 0;
-	}
-
-	.audio-button-area {
-		display: flex;
-		gap: 10px;
-		justify-content: center;
-		margin: 10px 0;
-	}
-
-	.btn-audio {
-		padding: 10px 20px;
-		font-size: 14px;
-		background-color: var(--color-audio);
-		color: white;
-		border: none;
-		border-radius: var(--radius-md);
-		cursor: pointer;
-		transition: background-color var(--transition-normal), transform var(--transition-normal);
-	}
-
-	.btn-audio:active {
-		background-color: var(--color-audio-dark);
-		transform: scale(0.98);
-	}
-
-	.options-area {
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: 10px;
-		margin-top: var(--space-md);
-	}
-
-	.option {
-		padding: 12px 15px;
-		font-size: 15px;
-		border: 2px solid var(--color-border);
-		background-color: var(--color-surface);
-		border-radius: var(--radius-md);
-		cursor: pointer;
-		text-align: left;
-		transition: all var(--transition-fast);
-		font-family: inherit;
-	}
-
-	.option:disabled {
-		cursor: default;
-	}
-
-	.option.correct {
-		border-color: var(--color-success);
-		background-color: var(--color-success-bg);
-	}
-
-	.option.incorrect {
-		border-color: var(--color-error);
-		background-color: var(--color-error-bg);
-	}
-
-	.feedback {
-		margin-top: var(--space-md);
-		padding: var(--space-sm);
-		border-radius: var(--radius-md);
-		text-align: center;
-		font-size: 15px;
-		font-weight: 600;
-	}
-
-	.feedback.success {
-		background-color: var(--color-success-bg);
-		color: var(--color-success-dark);
-	}
-
-	.feedback.error {
-		background-color: var(--color-error-bg);
-		color: var(--color-error-dark);
-	}
-
-	.results-screen {
-		text-align: center;
-	}
-
-	.results-screen h2 {
-		font-size: 20px;
-		margin: var(--space-md) 0;
-		color: var(--color-text-heading);
-	}
-
-	.results-score {
-		font-size: 32px;
-		font-weight: bold;
-		color: var(--color-primary);
-		margin: var(--space-lg) 0;
-	}
-
-	.results-detail {
-		font-size: 16px;
-		color: var(--color-text-muted);
-		margin: 10px 0;
-		line-height: 1.6;
-	}
-
-	.sentence-display {
-		background-color: var(--color-surface-alt);
-		padding: var(--space-md);
-		border-radius: var(--radius-md);
-		margin: 10px 0;
-	}
-
-	.vocabulary-list {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: var(--space-sm);
-		margin-top: var(--space-md);
-	}
-
-	.vocab-item {
-		padding: var(--space-sm);
-		background-color: var(--color-surface-alt);
-		border: none;
-		border-radius: var(--radius-md);
-		text-align: center;
-		font-size: 14px;
-		cursor: pointer;
-		transition: background-color var(--transition-fast), transform var(--transition-fast);
-		font-family: inherit;
-		width: 100%;
-	}
-
-	.vocab-item:active {
-		background-color: #e8eef5;
-		transform: scale(0.98);
-	}
-
-	.vocab-chinese {
-		font-size: 18px;
-		font-weight: bold;
-		color: var(--color-text-heading);
-		margin-bottom: 4px;
-	}
-
-	.vocab-pinyin {
-		font-size: 12px;
-		color: var(--color-primary);
-		margin-bottom: 4px;
-	}
-
-	.vocab-english {
-		font-size: 12px;
-		color: var(--color-text-muted);
-	}
-
-	@media (max-width: 480px) {
-		.container {
-			padding: var(--space-md);
+			--focus-outline: 2px solid var(--color-primary);
+			--focus-outline-offset: 2px;
 		}
 
+		/* ========== Base Styles ========== */
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		html {
+			font-size: 16px;
+			scroll-behavior: smooth;
+			-webkit-text-size-adjust: 100%;
+			-ms-text-size-adjust: 100%;
+			text-size-adjust: 100%;
+		}
+
+		@media (max-width: 640px) {
+			html {
+				font-size: 15px;
+			}
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+			background-color: var(--color-bg);
+			color: var(--color-text);
+			padding: var(--space-md);
+			min-height: 100vh;
+			line-height: 1.6;
+			letter-spacing: 0.3px;
+		}
+
+		/* ========== Layout ========== */
+		.container {
+			max-width: 600px;
+			margin: 0 auto;
+			background-color: var(--color-surface);
+			border-radius: var(--radius-lg);
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+			padding: var(--space-lg);
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+		}
+
+		@media (max-width: 640px) {
+			.container {
+				padding: var(--space-md);
+				border-radius: var(--radius-md);
+			}
+		}
+
+		/* ========== Typography ========== */
 		h1 {
-			font-size: 20px;
+			font-size: 28px;
+			font-weight: 600;
+			margin-bottom: var(--space-xs);
+			text-align: center;
+			color: var(--color-text-heading);
+			letter-spacing: -0.3px;
+		}
+
+		@media (max-width: 640px) {
+			h1 {
+				font-size: 24px;
+			}
+		}
+
+		.subtitle {
+			text-align: center;
+			color: var(--color-text-muted);
+			margin-bottom: var(--space-lg);
+			font-size: 14px;
+		}
+
+		.question-title {
+			font-size: 18px;
+			color: var(--color-text-muted);
+			font-weight: 500;
 		}
 
 		.question-content {
-			font-size: 24px;
+			font-size: 28px;
+			color: var(--color-text-heading);
+			font-weight: 600;
+			margin: var(--space-md) 0;
+			line-height: 1.6;
 		}
 
+		.pinyin-text {
+			font-size: 18px;
+			color: var(--color-primary);
+			margin: var(--space-sm) 0;
+			font-weight: 500;
+		}
+
+		.english-text {
+			font-size: 16px;
+			color: var(--color-text-muted);
+			font-style: italic;
+			margin: var(--space-sm) 0;
+		}
+
+		/* ========== Buttons ========== */
 		.btn {
+			display: block;
+			padding: 14px 20px;
+			font-size: 16px;
+			font-weight: 500;
+			border: none;
+			border-radius: var(--radius-md);
+			cursor: pointer;
+			transition: all var(--transition-normal);
+			text-align: center;
+			width: 100%;
+			font-family: inherit;
+			min-height: 44px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		@media (max-width: 640px) {
+			.btn {
+				padding: 12px 16px;
+				font-size: 15px;
+				min-height: 44px;
+			}
+		}
+
+		/* ========== Button Types ========== */
+		.btn-action {
+			background-color: var(--color-primary);
+			color: white;
+		}
+
+		.btn-action:hover {
+			background-color: var(--color-primary-dark);
+			box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+		}
+
+		.btn-action:focus {
+			outline: var(--focus-outline);
+			outline-offset: var(--focus-outline-offset);
+		}
+
+		.btn-action:focus:not(:focus-visible) {
+			outline: none;
+		}
+
+		.btn-action:active {
+			transform: scale(0.98);
+		}
+
+		.btn-action:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+		}
+
+		.btn-neutral {
+			background-color: var(--color-neutral);
+			color: white;
+		}
+
+		.btn-neutral:hover {
+			background-color: var(--color-neutral-dark);
+		}
+
+		.btn-neutral:focus {
+			outline: var(--focus-outline);
+			outline-offset: var(--focus-outline-offset);
+		}
+
+		.btn-neutral:focus:not(:focus-visible) {
+			outline: none;
+		}
+
+		.btn-neutral:active {
+			transform: scale(0.98);
+		}
+
+		.btn-back {
+			margin-top: var(--space-md);
+		}
+
+		.btn-audio {
+			padding: 10px 20px;
+			font-size: 14px;
+			font-weight: 500;
+			background-color: var(--color-audio);
+			color: white;
+			border: none;
+			border-radius: var(--radius-md);
+			cursor: pointer;
+			transition: all var(--transition-normal);
+			min-height: 44px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: var(--space-xs);
+		}
+
+		.btn-audio:hover {
+			background-color: var(--color-audio-dark);
+		}
+
+		.btn-audio:focus {
+			outline: var(--focus-outline);
+			outline-offset: var(--focus-outline-offset);
+		}
+
+		.btn-audio:focus:not(:focus-visible) {
+			outline: none;
+		}
+
+		.btn-audio:active {
+			transform: scale(0.98);
+		}
+
+		.btn-audio[aria-busy="true"] {
+			opacity: 0.8;
+			pointer-events: none;
+		}
+
+		/* ========== Audio Button Area ========== */
+		.audio-button-area {
+			display: flex;
+			gap: var(--space-sm);
+			justify-content: center;
+			margin: var(--space-sm) 0;
+			flex-wrap: wrap;
+		}
+
+		/* ========== Menu ========== */
+		.menu-section {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			gap: var(--space-md);
+		}
+
+		/* ========== Quiz Screens ========== */
+		.quiz-screen {
+			display: none;
+		}
+
+		.quiz-screen.active {
+			display: flex;
+			flex-direction: column;
+		}
+
+		/* ========== Progress Bar ========== */
+		.progress-bar {
+			width: 100%;
+			height: 6px;
+			background-color: var(--color-divider);
+			border-radius: 3px;
+			margin-top: var(--space-md);
+			margin-bottom: var(--space-md);
+			overflow: hidden;
+		}
+
+		.progress-fill {
+			height: 100%;
+			background-color: var(--color-primary);
+			transition: width var(--transition-normal);
+		}
+
+		/* ========== Question Area ========== */
+		.question-area {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			gap: var(--space-md);
+			margin-bottom: var(--space-md);
+			text-align: center;
+		}
+
+		/* ========== Options ========== */
+		.options-area {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: var(--space-sm);
+			margin-top: var(--space-md);
+		}
+
+		.option {
 			padding: 12px 15px;
 			font-size: 15px;
+			font-weight: 500;
+			border: 2px solid var(--color-border);
+			background-color: var(--color-surface);
+			border-radius: var(--radius-md);
+			cursor: pointer;
+			text-align: left;
+			transition: all var(--transition-fast);
+			font-family: inherit;
+			min-height: 44px;
+			display: flex;
+			align-items: center;
+		}
+
+		.option:hover:not(:disabled) {
+			border-color: var(--color-primary);
+			background-color: var(--color-surface-alt);
+		}
+
+		.option:focus {
+			outline: var(--focus-outline);
+			outline-offset: var(--focus-outline-offset);
+		}
+
+		.option:focus:not(:focus-visible) {
+			outline: none;
+		}
+
+		.option:disabled {
+			cursor: default;
+			opacity: 0.6;
+		}
+
+		.option.correct {
+			border-color: var(--color-success);
+			background-color: var(--color-success-bg);
+		}
+
+		.option.incorrect {
+			border-color: var(--color-error);
+			background-color: var(--color-error-bg);
+		}
+
+		/* ========== Feedback ========== */
+		.feedback {
+			margin-top: var(--space-md);
+			padding: var(--space-sm);
+			border-radius: var(--radius-md);
+			text-align: center;
+			font-size: 15px;
+			font-weight: 600;
+			animation: slideIn var(--transition-normal) ease;
+		}
+
+		.feedback.success {
+			background-color: var(--color-success-bg);
+			color: var(--color-success-dark);
+		}
+
+		.feedback.error {
+			background-color: var(--color-error-bg);
+			color: var(--color-error-dark);
+		}
+
+		@keyframes slideIn {
+			from {
+				opacity: 0;
+				transform: translateY(-4px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		/* ========== Results ========== */
+		.results-screen {
+			text-align: center;
+		}
+
+		.results-screen h2 {
+			font-size: 22px;
+			font-weight: 600;
+			margin: var(--space-md) 0;
+			color: var(--color-text-heading);
 		}
 
 		.results-score {
-			font-size: 28px;
+			font-size: 36px;
+			font-weight: 700;
+			color: var(--color-primary);
+			margin: var(--space-lg) 0;
 		}
 
-		.vocabulary-list {
-			grid-template-columns: 1fr;
+		.results-detail {
+			font-size: 16px;
+			color: var(--color-text-muted);
+			margin: var(--space-sm) 0;
 		}
-	}
-</style>
+
+		/* ========== Vocabulary ========== */
+		.vocabulary-list {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: var(--space-sm);
+		}
+
+		.vocab-item {
+			padding: 14px;
+			background-color: var(--color-surface-alt);
+			border: 1px solid var(--color-divider);
+			border-radius: var(--radius-md);
+			cursor: pointer;
+			transition: all var(--transition-fast);
+			text-align: left;
+			border: none;
+			font-family: inherit;
+			min-height: 44px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+
+		.vocab-item:hover {
+			background-color: var(--color-bg);
+			border-color: var(--color-primary);
+		}
+
+		.vocab-item:focus {
+			outline: var(--focus-outline);
+			outline-offset: var(--focus-outline-offset);
+		}
+
+		.vocab-item:focus:not(:focus-visible) {
+			outline: none;
+		}
+
+		.vocab-chinese {
+			font-size: 20px;
+			font-weight: 600;
+			color: var(--color-text-heading);
+		}
+
+		.vocab-pinyin {
+			font-size: 14px;
+			color: var(--color-primary);
+			font-weight: 500;
+		}
+
+		.vocab-english {
+			font-size: 13px;
+			color: var(--color-text-muted);
+			font-style: italic;
+		}
+
+		.vocab-item-content {
+			flex: 1;
+		}
+
+		/* ========== Sentence Display ========== */
+		.sentence-display {
+			background-color: var(--color-surface-alt);
+			padding: var(--space-md);
+			border-radius: var(--radius-md);
+			margin: var(--space-sm) 0;
+		}
+
+		/* ========== Responsive Design ========== */
+		@media (max-width: 640px) {
+			.container {
+				border-radius: var(--radius-md);
+			}
+
+			h1 {
+				font-size: 24px;
+				margin-bottom: 6px;
+			}
+
+			.btn {
+				min-height: 44px;
+				font-size: 15px;
+				padding: 12px 16px;
+			}
+
+			.question-content {
+				font-size: 28px;
+			}
+
+			.results-score {
+				font-size: 32px;
+			}
+
+			.vocabulary-list {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		/* ========== Utility Classes ========== */
+		.sr-only {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			padding: 0;
+			margin: -1px;
+			overflow: hidden;
+			clip: rect(0, 0, 0, 0);
+			white-space: nowrap;
+			border-width: 0;
+		}
+
+		.hidden {
+			display: none !important;
+		}
+	</style>
 </head>
 <body>
 	<div class="container">
@@ -377,22 +559,22 @@
 			<h1>HSK 1 Mandarin</h1>
 			<div class="subtitle">Learning Quiz</div>
 			<div class="menu-section">
-				<button class="btn btn-action" data-action="start-character-quiz">
+				<button class="btn btn-action" data-action="start-character-quiz" type="button">
 					Character Quiz — Hear &amp; Identify
 				</button>
-				<button class="btn btn-action" data-action="start-reverse-quiz">
+				<button class="btn btn-action" data-action="start-reverse-quiz" type="button">
 					Pinyin Quiz — Read &amp; Identify
 				</button>
-				<button class="btn btn-action" data-action="start-sentence-quiz">
+				<button class="btn btn-action" data-action="start-sentence-quiz" type="button">
 					Sentence Quiz — Hear &amp; Match
 				</button>
-				<button class="btn btn-action" data-action="start-sentence-builder">
+				<button class="btn btn-action" data-action="start-sentence-builder" type="button">
 					Sentence Practice — Read &amp; Listen
 				</button>
-				<button class="btn btn-action" data-action="start-fillblank-quiz">
+				<button class="btn btn-action" data-action="start-fillblank-quiz" type="button">
 					Fill in the Blank — Grammar Practice
 				</button>
-				<button class="btn btn-neutral" data-action="show-vocabulary">
+				<button class="btn btn-neutral" data-action="show-vocabulary" type="button">
 					View Vocabulary List
 				</button>
 			</div>
@@ -404,27 +586,33 @@
 			<div class="question-title">Listen and select the character</div>
 			<div class="question-area">
 				<div class="audio-button-area">
-					<button class="btn-audio" data-action="replay-audio">Play Audio</button>
+					<button class="btn-audio" data-action="replay-audio" type="button" aria-label="Replay pronunciation">
+						Replay
+					</button>
 				</div>
-				<div id="charFeedback" aria-live="polite"></div>
 			</div>
-			<div class="options-area" id="charOptions"></div>
-			<button class="btn btn-neutral btn-back" data-action="return-to-menu">Back to Menu</button>
+			<div class="options-area" id="charOptions" role="group" aria-label="Character options"></div>
+			<div id="charFeedback" role="status" aria-live="polite"></div>
+			<button class="btn btn-neutral btn-back" data-action="return-to-menu" type="button">Back to Menu</button>
 		</div>
 
 		<!-- Reverse Quiz Screen -->
 		<div id="reverseQuizScreen" class="quiz-screen">
 			<div class="progress-bar"><div class="progress-fill" id="reverseProgress"></div></div>
-			<div class="question-title">Read and select the meaning</div>
+			<div class="question-title">Read and select the definition</div>
 			<div class="question-area">
-				<div class="question-content" id="reverseDisplay"></div>
-				<div class="audio-button-area">
-					<button class="btn-audio" data-action="replay-audio">Play Audio</button>
+				<div class="sentence-display">
+					<div class="question-content" id="reverseDisplay"></div>
 				</div>
-				<div id="reverseFeedback" aria-live="polite"></div>
+				<div class="audio-button-area">
+					<button class="btn-audio" data-action="replay-audio" type="button" aria-label="Replay pronunciation">
+						Replay
+					</button>
+				</div>
 			</div>
-			<div class="options-area" id="reverseOptions"></div>
-			<button class="btn btn-neutral btn-back" data-action="return-to-menu">Back to Menu</button>
+			<div class="options-area" id="reverseOptions" role="group" aria-label="Definition options"></div>
+			<div id="reverseFeedback" role="status" aria-live="polite"></div>
+			<button class="btn btn-neutral btn-back" data-action="return-to-menu" type="button">Back to Menu</button>
 		</div>
 
 		<!-- Sentence Quiz Screen -->
@@ -433,12 +621,14 @@
 			<div class="question-title">Listen and select the sentence</div>
 			<div class="question-area">
 				<div class="audio-button-area">
-					<button class="btn-audio" data-action="replay-audio">Play Audio</button>
+					<button class="btn-audio" data-action="replay-audio" type="button" aria-label="Replay sentence">
+						Replay
+					</button>
 				</div>
-				<div id="sentenceFeedback" aria-live="polite"></div>
 			</div>
-			<div class="options-area" id="sentenceOptions"></div>
-			<button class="btn btn-neutral btn-back" data-action="return-to-menu">Back to Menu</button>
+			<div class="options-area" id="sentenceOptions" role="group" aria-label="Sentence options"></div>
+			<div id="sentenceFeedback" role="status" aria-live="polite"></div>
+			<button class="btn btn-neutral btn-back" data-action="return-to-menu" type="button">Back to Menu</button>
 		</div>
 
 		<!-- Sentence Builder (Practice) Screen -->
@@ -452,425 +642,702 @@
 					<div class="english-text" id="englishDisplay"></div>
 				</div>
 				<div class="audio-button-area">
-					<button class="btn-audio" data-action="replay-audio">Play Audio</button>
+					<button class="btn-audio" data-action="replay-audio" type="button" aria-label="Play sentence audio">
+						Play Audio
+					</button>
 				</div>
 			</div>
-			<button class="btn btn-action" data-action="next-sentence">Next Sentence</button>
-			<button class="btn btn-neutral btn-back" data-action="return-to-menu">Back to Menu</button>
+			<button class="btn btn-action" data-action="next-sentence" type="button">Next Sentence</button>
+			<button class="btn btn-neutral btn-back" data-action="return-to-menu" type="button">Back to Menu</button>
 		</div>
 
 		<!-- Fill-in-the-Blank Quiz Screen -->
 		<div id="fillBlankQuizScreen" class="quiz-screen">
 			<div class="progress-bar"><div class="progress-fill" id="fillBlankProgress"></div></div>
-			<div class="question-title">Fill in the Blank</div>
+			<div class="question-title">Fill in the blank</div>
 			<div class="question-area">
-				<div class="question-content" id="fillBlankSentence"></div>
-				<div class="english-text" id="fillBlankEnglish"></div>
+				<div class="sentence-display">
+					<div class="question-content" id="fillBlankSentence"></div>
+					<div class="pinyin-text" id="fillBlankPinyin"></div>
+					<div class="english-text" id="fillBlankEnglish"></div>
+				</div>
 				<div class="audio-button-area">
-					<button class="btn-audio" data-action="replay-audio">Play Audio</button>
+					<button class="btn-audio" data-action="replay-audio" type="button" aria-label="Play sentence audio">
+						Play Audio
+					</button>
 				</div>
 			</div>
-			<div class="options-area" id="fillBlankOptions"></div>
-			<div id="fillBlankFeedback"></div>
-			<button class="btn btn-neutral btn-back" data-action="return-to-menu">Back to Menu</button>
+			<div class="options-area" id="fillBlankOptions" role="group" aria-label="Word options"></div>
+			<div id="fillBlankFeedback" role="status" aria-live="polite"></div>
+			<button class="btn btn-neutral btn-back" data-action="return-to-menu" type="button">Back to Menu</button>
 		</div>
 
 		<!-- Vocabulary Screen -->
 		<div id="vocabularyScreen" class="quiz-screen">
-			<h2 style="margin-bottom: 15px;">HSK 1 Vocabulary</h2>
-			<div class="vocabulary-list" id="vocabList"></div>
-			<button class="btn btn-neutral btn-back" data-action="return-to-menu">Back to Menu</button>
+			<div class="question-title" style="margin-bottom: var(--space-lg); text-align: center;">
+				HSK Level 1 Vocabulary
+			</div>
+			<div class="vocabulary-list" id="vocabList" role="list"></div>
+			<button class="btn btn-neutral btn-back" data-action="return-to-menu" type="button">Back to Menu</button>
 		</div>
 
-		<!-- Practice Complete Screen (Sentence Builder has no score, so it gets its own screen) -->
-		<div id="practiceCompleteScreen" class="quiz-screen results-screen">
-			<h2>Practice Complete!</h2>
-			<div class="results-detail">You reviewed every sentence in this set. Nice work!</div>
-			<button class="btn btn-action" data-action="return-to-menu" style="margin-top: 20px;">Return to Menu</button>
-		</div>
-
-		<!-- Results Screen (quizzes with a score) -->
+		<!-- Results Screen -->
 		<div id="resultsScreen" class="quiz-screen results-screen">
 			<h2>Quiz Complete!</h2>
-			<div class="results-score" id="scoreDisplay"></div>
+			<div class="results-score" id="scoreDisplay" role="status" aria-live="polite"></div>
 			<div class="results-detail" id="resultsDetail"></div>
-			<button class="btn btn-action" data-action="return-to-menu" style="margin-top: 20px;">Return to Menu</button>
+			<button class="btn btn-action" data-action="return-to-menu" type="button" style="margin-top: 20px;">Return to Menu</button>
 		</div>
 	</div>
 
 	<script>
-	'use strict';
+		'use strict';
 
-	// ---------- Data ----------
-	const vocabulary = [
-		{ chinese: '的', pinyin: 'de', english: '(Possessive particle)', pinyinFile: '0/0d/Zh-de' },
-		{ chinese: '好', pinyin: 'hǎo', english: 'Good / Well / Fine', pinyinFile: '2/22/Zh-h%C7%8Eo' },
-		{ chinese: '很', pinyin: 'hěn', english: 'Very / Quite', pinyinFile: 'd/df/Zh-h%C4%9Bn' },
-		{ chinese: '里', pinyin: 'lǐ', english: 'Inside / Interior / Within', pinyinFile: 'b/b5/Zh-l%C7%90' },
-		{ chinese: '吗', pinyin: 'ma', english: '(Question particle)', pinyinFile: '3/37/Zh-ma' },
-		{ chinese: '你', pinyin: 'nǐ', english: 'You (Singular)', pinyinFile: '7/73/Zh-n%C7%90' },
-		{ chinese: '我', pinyin: 'wǒ', english: 'I / Me / My', pinyinFile: '4/42/Zh-w%C7%92' },
-		{ chinese: '想', pinyin: 'xiǎng', english: 'Think / Want / Miss / Wish', pinyinFile: '0/04/Zh-xi%C7%8Eng' },
-		{ chinese: '在', pinyin: 'zài', english: 'Be at / Be in / Exist / In the middle of', pinyinFile: '9/94/Zh-z%C3%A0i' },
-		{ chinese: '这', pinyin: 'zhè', english: 'This / These', pinyinFile: '1/1e/Zh-zh%C3%A8' }
-	];
+		// ========== DOM Element Caching ==========
+		const DOM = {
+			mainMenu: document.getElementById('mainMenu'),
+			characterQuizScreen: document.getElementById('characterQuizScreen'),
+			reverseQuizScreen: document.getElementById('reverseQuizScreen'),
+			sentenceQuizScreen: document.getElementById('sentenceQuizScreen'),
+			sentenceBuilderScreen: document.getElementById('sentenceBuilderScreen'),
+			fillBlankQuizScreen: document.getElementById('fillBlankQuizScreen'),
+			vocabularyScreen: document.getElementById('vocabularyScreen'),
+			resultsScreen: document.getElementById('resultsScreen'),
+			charOptions: document.getElementById('charOptions'),
+			reverseOptions: document.getElementById('reverseOptions'),
+			sentenceOptions: document.getElementById('sentenceOptions'),
+			fillBlankOptions: document.getElementById('fillBlankOptions'),
+			charFeedback: document.getElementById('charFeedback'),
+			reverseFeedback: document.getElementById('reverseFeedback'),
+			sentenceFeedback: document.getElementById('sentenceFeedback'),
+			fillBlankFeedback: document.getElementById('fillBlankFeedback'),
+			charProgress: document.getElementById('charProgress'),
+			reverseProgress: document.getElementById('reverseProgress'),
+			sentenceProgress: document.getElementById('sentenceProgress'),
+			fillBlankProgress: document.getElementById('fillBlankProgress'),
+			sentenceBuilderProgress: document.getElementById('sentenceBuilderProgress'),
+			reverseDisplay: document.getElementById('reverseDisplay'),
+			sentenceDisplay: document.getElementById('sentenceDisplay'),
+			pinyinDisplay: document.getElementById('pinyinDisplay'),
+			englishDisplay: document.getElementById('englishDisplay'),
+			fillBlankSentence: document.getElementById('fillBlankSentence'),
+			fillBlankPinyin: document.getElementById('fillBlankPinyin'),
+			fillBlankEnglish: document.getElementById('fillBlankEnglish'),
+			vocabList: document.getElementById('vocabList'),
+			scoreDisplay: document.getElementById('scoreDisplay'),
+			resultsDetail: document.getElementById('resultsDetail'),
+			container: document.querySelector('.container')
+		};
 
-	const sentences = [
-		{ chinese: '好的！', pinyin: 'hǎo de!', english: 'Okay! / Sounds good!' },
-		{ chinese: '很好！', pinyin: 'hěn hǎo!', english: 'Very good! / Great!' },
-		{ chinese: '你好！', pinyin: 'nǐ hǎo!', english: 'Hello!' },
-		{ chinese: '你好吗？', pinyin: 'nǐ hǎo ma?', english: 'How are you?' },
-		{ chinese: '你很好！', pinyin: 'nǐ hěn hǎo!', english: 'You are good! / You are a good person!' },
-		{ chinese: '你在这里吗？', pinyin: 'nǐ zài zhè lǐ ma?', english: 'Are you here?' },
-		{ chinese: '我很好！', pinyin: 'wǒ hěn hǎo!', english: 'I am good! / I am doing well!' },
-		{ chinese: '我想你。', pinyin: 'wǒ xiǎng nǐ.', english: 'I miss you. / I think about you.' },
-		{ chinese: '我在这里。', pinyin: 'wǒ zài zhè lǐ.', english: 'I am here.' },
-		{ chinese: '这很好。', pinyin: 'zhè hěn hǎo.', english: 'This is very good.' }
-	];
+		// ========== Constants ==========
+		const CONFIG = {
+			OPTIONS_PER_QUESTION: 4,
+			FEEDBACK_DELAY_MS: 1500,
+			AUDIO_BASE_URL: 'https://upload.wikimedia.org/wikipedia/commons/',
+			AUDIO_FAILURE_MSG: 'Audio not available',
+			PUNCTUATION: new Set(['。', '，', '？', '！'])
+		};
 
-	// Generate fill-in-the-blank questions dynamically from sentences
-	function generateFillBlankQuestions(sentencesArray) {
-		const punctuation = new Set(['。', '，', '？', '！']);
-		const questions = [];
+		// ========== Data ==========
+		const vocabulary = [
+			{ chinese: '的', pinyin: 'de', english: '(Possessive particle)', pinyinFile: '0/0d/Zh-de' },
+			{ chinese: '好', pinyin: 'hǎo', english: 'Good / Well / Fine', pinyinFile: '2/22/Zh-h%C7%8Eo' },
+			{ chinese: '很', pinyin: 'hěn', english: 'Very / Quite', pinyinFile: 'd/df/Zh-h%C4%9Bn' },
+			{ chinese: '里', pinyin: 'lǐ', english: 'Inside / Interior / Within', pinyinFile: 'b/b5/Zh-l%C7%90' },
+			{ chinese: '吗', pinyin: 'ma', english: '(Question particle)', pinyinFile: '3/37/Zh-ma' },
+			{ chinese: '你', pinyin: 'nǐ', english: 'You (Singular)', pinyinFile: '7/73/Zh-n%C7%90' },
+			{ chinese: '我', pinyin: 'wǒ', english: 'I / Me / My', pinyinFile: '4/42/Zh-w%C7%92' },
+			{ chinese: '想', pinyin: 'xiǎng', english: 'Think / Want / Miss / Wish', pinyinFile: '0/04/Zh-xi%C7%8Eng' },
+			{ chinese: '在', pinyin: 'zài', english: 'Be at / Be in / Exist / In the middle of', pinyinFile: '9/94/Zh-z%C3%A0i' },
+			{ chinese: '这', pinyin: 'zhè', english: 'This / These', pinyinFile: '1/1e/Zh-zh%C3%A8' }
+		];
 
-		sentencesArray.forEach(sentenceObj => {
-			const characters = [...sentenceObj.chinese].filter(char => !punctuation.has(char));
+		const sentences = [
+			{ chinese: '好的！', pinyin: 'hǎo de!', english: 'Okay! / Sounds good!' },
+			{ chinese: '很好！', pinyin: 'hěn hǎo!', english: 'Very good! / Great!' },
+			{ chinese: '你好！', pinyin: 'nǐ hǎo!', english: 'Hello!' },
+			{ chinese: '你好吗？', pinyin: 'nǐ hǎo ma?', english: 'How are you?' },
+			{ chinese: '你很好！', pinyin: 'nǐ hěn hǎo!', english: 'You are good! / You are a good person!' },
+			{ chinese: '你在这里吗？', pinyin: 'nǐ zài zhè lǐ ma?', english: 'Are you here?' },
+			{ chinese: '我很好！', pinyin: 'wǒ hěn hǎo!', english: 'I am good! / I am doing well!' },
+			{ chinese: '我想你。', pinyin: 'wǒ xiǎng nǐ.', english: 'I miss you. / I think about you.' },
+			{ chinese: '我在这里。', pinyin: 'wǒ zài zhè lǐ.', english: 'I am here.' },
+			{ chinese: '这很好。', pinyin: 'zhè hěn hǎo.', english: 'This is very good.' }
+		];
 
-			// Randomly select one character from the sentence to be the blank
-			if (characters.length > 0) {
-				const randomIndex = Math.floor(Math.random() * characters.length);
-				const charToBlank = characters[randomIndex];
-				const sentenceWithBlank = sentenceObj.chinese.replace(charToBlank, '___');
+		// ========== State Management ==========
+		const state = {
+			quizType: null,
+			questions: [],
+			index: 0,
+			score: 0,
+			hasScore: true,
+			audioQueue: []
+		};
 
-				questions.push({
-					sentence: sentenceWithBlank,
-					blank: charToBlank,
-					fullSentence: sentenceObj.chinese,
-					english: sentenceObj.english
+		/**
+		 * Reset application state to initial values
+		 */
+		function resetState() {
+			Object.assign(state, {
+				quizType: null,
+				questions: [],
+				index: 0,
+				score: 0,
+				hasScore: true,
+				audioQueue: []
+			});
+		}
+
+		// ========== Utility Functions ==========
+
+		/**
+		 * Shuffle an array using Fisher-Yates algorithm
+		 * @param {Array} array - Array to shuffle
+		 * @returns {Array} New shuffled array
+		 */
+		function shuffle(array) {
+			const arr = [...array];
+			for (let i = arr.length - 1; i > 0; i--) {
+				const j = Math.floor(Math.random() * (i + 1));
+				[arr[i], arr[j]] = [arr[j], arr[i]];
+			}
+			return arr;
+		}
+
+		/**
+		 * Build multiple choice options
+		 * @param {Object} correctItem - Correct answer
+		 * @param {Array} pool - Pool of all possible options
+		 * @param {string} matchKey - Key to match against
+		 * @returns {Array} Shuffled array of options
+		 */
+		function buildOptions(correctItem, pool, matchKey) {
+			try {
+				const distractors = shuffle(
+					pool.filter(item => item[matchKey] !== correctItem[matchKey])
+				).slice(0, CONFIG.OPTIONS_PER_QUESTION - 1);
+
+				return shuffle([correctItem, ...distractors]);
+			} catch (error) {
+				console.error('Error building options:', error);
+				return [correctItem];
+			}
+		}
+
+		/**
+		 * Show/hide quiz screens
+		 * @param {string} screenId - ID of screen to show
+		 */
+		function showScreen(screenId) {
+			try {
+				document.querySelectorAll('.quiz-screen, #mainMenu').forEach(el => {
+					el.classList.remove('active');
 				});
+				const screen = document.getElementById(screenId);
+				if (screen) {
+					screen.classList.add('active');
+				} else {
+					console.error(`Screen not found: ${screenId}`);
+				}
+			} catch (error) {
+				console.error('Error showing screen:', error);
 			}
-		});
-
-		return questions;
-	}
-
-	const OPTIONS_PER_QUESTION = 4;
-	const FEEDBACK_DELAY_MS = 1500;
-	const AUDIO_BASE_URL = 'https://upload.wikimedia.org/wikipedia/commons/';
-
-	// ---------- Quiz state ----------
-	// A single state object instead of scattered globals keeps the "what mode
-	// am I in / how far am I / how did I do" logic in one predictable place.
-	const state = {
-		quizType: null, // 'character' | 'reverse' | 'sentence' | 'builder'
-		questions: [],
-		index: 0,
-		score: 0,
-		hasScore: true, // false for the sentence-builder practice mode
-		audioQueue: []
-	};
-
-	// ---------- Generic helpers ----------
-	function shuffle(array) {
-		const arr = [...array];
-		for (let i = arr.length - 1; i > 0; i--) {
-			const j = Math.floor(Math.random() * (i + 1));
-			[arr[i], arr[j]] = [arr[j], arr[i]];
 		}
-		return arr;
-	}
 
-	// Pick `count` random wrong answers plus the correct one, then shuffle.
-	function buildOptions(correctItem, pool, matchKey) {
-		const distractors = shuffle(pool.filter(item => item[matchKey] !== correctItem[matchKey]))
-			.slice(0, OPTIONS_PER_QUESTION - 1);
-		return shuffle([correctItem, ...distractors]);
-	}
-
-	function showScreen(screenId) {
-		document.querySelectorAll('.quiz-screen, #mainMenu').forEach(el => el.classList.remove('active'));
-		document.getElementById(screenId).classList.add('active');
-	}
-
-	function updateProgress(current, total, progressId) {
-		document.getElementById(progressId).style.width = `${(current / total) * 100}%`;
-	}
-
-	function clearChildren(el) {
-		el.replaceChildren();
-	}
-
-	// ---------- Audio ----------
-	function getAudioPath(pinyinFile) {
-		return `${AUDIO_BASE_URL}${pinyinFile}.ogg`;
-	}
-
-	function playSingle(path) {
-		const audio = new Audio(path);
-		audio.play().catch(() => console.warn(`Audio not available: ${path}`));
-	}
-
-	// Plays a list of audio clips back-to-back, one at a time.
-	function playSequence(paths) {
-		state.audioQueue = [...paths];
-		playNextInQueue();
-	}
-
-	function playNextInQueue() {
-		if (state.audioQueue.length === 0) return;
-		const path = state.audioQueue.shift();
-		const audio = new Audio(path);
-		audio.onended = playNextInQueue;
-		audio.onerror = playNextInQueue;
-		audio.play().catch(playNextInQueue);
-	}
-
-	// Sentences aren't individually recorded, so we stitch together audio for
-	// each character we recognize from the vocabulary list.
-	function getSentenceAudioPaths(chineseText) {
-		const punctuation = new Set(['。', '，', '？', '！']);
-		return [...chineseText]
-			.filter(char => !punctuation.has(char))
-			.map(char => vocabulary.find(v => v.chinese.includes(char)))
-			.filter(Boolean)
-			.map(v => getAudioPath(v.pinyinFile));
-	}
-
-	function playSentenceAudio(chineseText) {
-		playSequence(getSentenceAudioPaths(chineseText));
-	}
-
-	// Replays audio for whatever question is currently on screen.
-	function replayCurrentAudio() {
-		const question = state.questions[state.index];
-		if (!question) return;
-		if (state.quizType === 'sentence' || state.quizType === 'builder') {
-			playSentenceAudio(question.chinese);
-		} else if (state.quizType === 'fillblank') {
-			playSentenceAudio(question.fullSentence);
-		} else {
-			playSingle(getAudioPath(question.pinyinFile));
-		}
-	}
-
-	// ---------- Quiz flow (shared by character / reverse / sentence quizzes) ----------
-	const QUIZ_CONFIG = {
-		character: {
-			screenId: 'characterQuizScreen',
-			progressId: 'charProgress',
-			optionsId: 'charOptions',
-			feedbackId: 'charFeedback',
-			pool: vocabulary,
-			matchKey: 'chinese',
-			renderOptionLabel: item => item.chinese,
-			onEnter: question => playSingle(getAudioPath(question.pinyinFile))
-		},
-		reverse: {
-			screenId: 'reverseQuizScreen',
-			progressId: 'reverseProgress',
-			optionsId: 'reverseOptions',
-			feedbackId: 'reverseFeedback',
-			pool: vocabulary,
-			matchKey: 'chinese',
-			renderOptionLabel: item => `${item.pinyin} — ${item.english}`,
-			onEnter: question => {
-				document.getElementById('reverseDisplay').textContent = question.chinese;
-				playSingle(getAudioPath(question.pinyinFile));
+		/**
+		 * Update progress bar width
+		 * @param {number} current - Current question number
+		 * @param {number} total - Total questions
+		 * @param {HTMLElement} element - Progress fill element
+		 */
+		function updateProgress(current, total, element) {
+			try {
+				const percentage = (current / total) * 100;
+				element.style.width = `${percentage}%`;
+			} catch (error) {
+				console.error('Error updating progress:', error);
 			}
-		},
-		sentence: {
-			screenId: 'sentenceQuizScreen',
-			progressId: 'sentenceProgress',
-			optionsId: 'sentenceOptions',
-			feedbackId: 'sentenceFeedback',
-			pool: sentences,
-			matchKey: 'chinese',
-			renderOptionLabel: item => item.chinese,
-			onEnter: question => playSentenceAudio(question.chinese)
-		},
-		fillblank: {
-			screenId: 'fillBlankQuizScreen',
-			progressId: 'fillBlankProgress',
-			optionsId: 'fillBlankOptions',
-			feedbackId: 'fillBlankFeedback',
-			pool: vocabulary,
-			matchKey: 'chinese',
-			renderOptionLabel: item => `${item.chinese} (${item.pinyin})`,
-			onEnter: question => playSentenceAudio(question.fullSentence)
-		}
-	};
-
-	function startQuiz(quizType, sourceData) {
-		state.quizType = quizType;
-		state.questions = shuffle(sourceData);
-		state.index = 0;
-		state.score = 0;
-		state.hasScore = true;
-		showQuestion();
-		showScreen(QUIZ_CONFIG[quizType].screenId);
-	}
-
-	function showQuestion() {
-		const config = QUIZ_CONFIG[state.quizType];
-		if (state.index >= state.questions.length) {
-			showResults();
-			return;
 		}
 
-		const question = state.questions[state.index];
-		updateProgress(state.index + 1, state.questions.length, config.progressId);
+		// ========== Audio Functions ==========
 
-		// Special handling for fillblank quiz
-		if (state.quizType === 'fillblank') {
-			document.getElementById('fillBlankSentence').textContent = question.sentence;
-			document.getElementById('fillBlankEnglish').textContent = `Meaning: ${question.english}`;
-
-			// Find the correct answer from vocabulary
-			const correctAnswer = config.pool.find(v => v.chinese === question.blank);
-			const options = buildOptions(correctAnswer, config.pool, config.matchKey);
-
-			const optionsContainer = document.getElementById(config.optionsId);
-			clearChildren(optionsContainer);
-			options.forEach(option => {
-				const button = document.createElement('button');
-				button.className = 'option';
-				button.textContent = config.renderOptionLabel(option);
-				button.addEventListener('click', () => selectAnswer(option, correctAnswer, config, button));
-				optionsContainer.appendChild(button);
-			});
-
-			document.getElementById(config.feedbackId).replaceChildren();
-			config.onEnter(question);
-		} else {
-			// Original logic for other quiz types
-			const options = buildOptions(question, config.pool, config.matchKey);
-
-			const optionsContainer = document.getElementById(config.optionsId);
-			clearChildren(optionsContainer);
-			options.forEach(option => {
-				const button = document.createElement('button');
-				button.className = 'option';
-				button.textContent = config.renderOptionLabel(option);
-				button.addEventListener('click', () => selectAnswer(option, question, config, button));
-				optionsContainer.appendChild(button);
-			});
-
-			document.getElementById(config.feedbackId).replaceChildren();
-			config.onEnter(question);
+		/**
+		 * Get full audio path from filename
+		 * @param {string} pinyinFile - Wikimedia Commons filename
+		 * @returns {string} Full audio URL
+		 */
+		function getAudioPath(pinyinFile) {
+			return `${CONFIG.AUDIO_BASE_URL}${pinyinFile}.ogg`;
 		}
-	}
 
-	function selectAnswer(chosenOption, correctQuestion, config, button) {
-		const isCorrect = chosenOption[config.matchKey] === correctQuestion[config.matchKey];
-		const feedback = document.getElementById(config.feedbackId);
-		const optionButtons = document.getElementById(config.optionsId).querySelectorAll('.option');
+		/**
+		 * Play a single audio file
+		 * @param {string} path - Audio file path
+		 * @param {HTMLElement} button - Optional button to indicate loading state
+		 */
+		function playSingle(path, button = null) {
+			try {
+				if (button) {
+					button.setAttribute('aria-busy', 'true');
+				}
 
-		// Prevent double answers while feedback is showing.
-		optionButtons.forEach(btn => btn.disabled = true);
+				const audio = new Audio(path);
+				audio.onended = () => {
+					if (button) button.setAttribute('aria-busy', 'false');
+				};
+				audio.onerror = () => {
+					console.warn(`${CONFIG.AUDIO_FAILURE_MSG}: ${path}`);
+					if (button) button.setAttribute('aria-busy', 'false');
+				};
+				audio.play().catch(err => {
+					console.warn(`${CONFIG.AUDIO_FAILURE_MSG}: ${path}`, err);
+					if (button) button.setAttribute('aria-busy', 'false');
+				});
+			} catch (error) {
+				console.error('Error playing audio:', error);
+			}
+		}
 
-		const feedbackEl = document.createElement('div');
-		feedbackEl.className = `feedback ${isCorrect ? 'success' : 'error'}`;
-		feedbackEl.textContent = isCorrect ? 'Correct!' : 'Incorrect';
-		feedback.replaceChildren(feedbackEl);
-		button.classList.add(isCorrect ? 'correct' : 'incorrect');
+		/**
+		 * Play audio sequence
+		 * @param {Array} paths - Array of audio paths
+		 */
+		function playSequence(paths) {
+			state.audioQueue = [...paths];
+			playNextInQueue();
+		}
 
-		if (isCorrect) state.score++;
-		setTimeout(() => {
+		/**
+		 * Play next audio in queue
+		 */
+		function playNextInQueue() {
+			if (state.audioQueue.length === 0) return;
+			const path = state.audioQueue.shift();
+			const audio = new Audio(path);
+			audio.onended = playNextInQueue;
+			audio.onerror = playNextInQueue;
+			audio.play().catch(playNextInQueue);
+		}
+
+		/**
+		 * Get audio paths for a sentence
+		 * @param {string} chineseText - Chinese sentence
+		 * @returns {Array} Array of audio paths
+		 */
+		function getSentenceAudioPaths(chineseText) {
+			try {
+				return [...chineseText]
+					.filter(char => !CONFIG.PUNCTUATION.has(char))
+					.map(char => vocabulary.find(v => v.chinese.includes(char)))
+					.filter(Boolean)
+					.map(v => getAudioPath(v.pinyinFile));
+			} catch (error) {
+				console.error('Error getting sentence audio paths:', error);
+				return [];
+			}
+		}
+
+		/**
+		 * Play pronunciation for a sentence
+		 * @param {string} chineseText - Chinese sentence
+		 */
+		function playSentenceAudio(chineseText) {
+			playSequence(getSentenceAudioPaths(chineseText));
+		}
+
+		// ========== Fill-in-the-Blank Generator ==========
+
+		/**
+		 * Generate fill-in-the-blank questions from sentences
+		 * @param {Array} sentencesArray - Array of sentence objects
+		 * @returns {Array} Generated questions
+		 */
+		function generateFillBlankQuestions(sentencesArray) {
+			try {
+				const questions = [];
+
+				sentencesArray.forEach(sentenceObj => {
+					const characters = [...sentenceObj.chinese]
+						.filter(char => !CONFIG.PUNCTUATION.has(char));
+
+					if (characters.length > 0) {
+						const randomIndex = Math.floor(Math.random() * characters.length);
+						const charToBlank = characters[randomIndex];
+						const sentenceWithBlank = sentenceObj.chinese.replace(charToBlank, '___');
+
+						const vocabItem = vocabulary.find(v => v.chinese === charToBlank);
+						let pinyinWithBlank = sentenceObj.pinyin;
+
+						if (vocabItem) {
+							pinyinWithBlank = pinyinWithBlank.replace(vocabItem.pinyin, '___');
+						}
+
+						questions.push({
+							sentence: sentenceWithBlank,
+							blank: charToBlank,
+							fullSentence: sentenceObj.chinese,
+							fullSentencePinyin: sentenceObj.pinyin,
+							pinyinWithBlank: pinyinWithBlank,
+							english: sentenceObj.english
+						});
+					}
+				});
+
+				return questions;
+			} catch (error) {
+				console.error('Error generating fill-blank questions:', error);
+				return [];
+			}
+		}
+
+		// ========== Quiz Flow ==========
+
+		const QUIZ_CONFIG = {
+			character: {
+				screenId: 'characterQuizScreen',
+				progressElement: DOM.charProgress,
+				optionsContainer: DOM.charOptions,
+				feedbackContainer: DOM.charFeedback,
+				pool: vocabulary,
+				matchKey: 'chinese',
+				renderOptionLabel: item => item.chinese,
+				onEnter: question => playSingle(getAudioPath(question.pinyinFile))
+			},
+			reverse: {
+				screenId: 'reverseQuizScreen',
+				progressElement: DOM.reverseProgress,
+				optionsContainer: DOM.reverseOptions,
+				feedbackContainer: DOM.reverseFeedback,
+				pool: vocabulary,
+				matchKey: 'chinese',
+				renderOptionLabel: item => `${item.pinyin} — ${item.english}`,
+				onEnter: question => {
+					DOM.reverseDisplay.textContent = question.chinese;
+					playSingle(getAudioPath(question.pinyinFile));
+				}
+			},
+			sentence: {
+				screenId: 'sentenceQuizScreen',
+				progressElement: DOM.sentenceProgress,
+				optionsContainer: DOM.sentenceOptions,
+				feedbackContainer: DOM.sentenceFeedback,
+				pool: sentences,
+				matchKey: 'chinese',
+				renderOptionLabel: item => item.chinese,
+				onEnter: question => playSentenceAudio(question.chinese)
+			},
+			fillblank: {
+				screenId: 'fillBlankQuizScreen',
+				progressElement: DOM.fillBlankProgress,
+				optionsContainer: DOM.fillBlankOptions,
+				feedbackContainer: DOM.fillBlankFeedback,
+				pool: vocabulary,
+				matchKey: 'chinese',
+				renderOptionLabel: item => `${item.chinese} (${item.pinyin})`,
+				onEnter: question => playSentenceAudio(question.fullSentence)
+			}
+		};
+
+		/**
+		 * Start a quiz
+		 * @param {string} quizType - Type of quiz
+		 * @param {Array} sourceData - Question data
+		 */
+		function startQuiz(quizType, sourceData) {
+			try {
+				if (!QUIZ_CONFIG[quizType]) {
+					console.error(`Invalid quiz type: ${quizType}`);
+					return;
+				}
+
+				resetState();
+				state.quizType = quizType;
+				state.questions = shuffle(sourceData);
+
+				if (state.questions.length === 0) {
+					console.error('No questions available for quiz');
+					return;
+				}
+
+				showQuestion();
+				showScreen(QUIZ_CONFIG[quizType].screenId);
+			} catch (error) {
+				console.error('Error starting quiz:', error);
+			}
+		}
+
+		/**
+		 * Show the current question
+		 */
+		function showQuestion() {
+			try {
+				const config = QUIZ_CONFIG[state.quizType];
+
+				if (state.index >= state.questions.length) {
+					showResults();
+					return;
+				}
+
+				const question = state.questions[state.index];
+				updateProgress(state.index + 1, state.questions.length, config.progressElement);
+
+				// Special handling for fillblank quiz
+				if (state.quizType === 'fillblank') {
+					DOM.fillBlankSentence.textContent = question.sentence;
+					DOM.fillBlankPinyin.textContent = question.pinyinWithBlank;
+					DOM.fillBlankEnglish.textContent = `Meaning: ${question.english}`;
+
+					const correctAnswer = config.pool.find(v => v.chinese === question.blank);
+					const options = buildOptions(correctAnswer, config.pool, config.matchKey);
+
+					config.optionsContainer.replaceChildren();
+					options.forEach(option => {
+						const button = document.createElement('button');
+						button.className = 'option';
+						button.type = 'button';
+						button.textContent = config.renderOptionLabel(option);
+						button.addEventListener('click', () => selectAnswer(option, correctAnswer, config, button));
+						config.optionsContainer.appendChild(button);
+					});
+
+					config.feedbackContainer.replaceChildren();
+					config.onEnter(question);
+				} else {
+					// Original logic for other quiz types
+					const options = buildOptions(question, config.pool, config.matchKey);
+
+					config.optionsContainer.replaceChildren();
+					options.forEach(option => {
+						const button = document.createElement('button');
+						button.className = 'option';
+						button.type = 'button';
+						button.textContent = config.renderOptionLabel(option);
+						button.addEventListener('click', () => selectAnswer(option, question, config, button));
+						config.optionsContainer.appendChild(button);
+					});
+
+					config.feedbackContainer.replaceChildren();
+					config.onEnter(question);
+				}
+			} catch (error) {
+				console.error('Error showing question:', error);
+			}
+		}
+
+		/**
+		 * Handle answer selection
+		 * @param {Object} chosenOption - Selected option
+		 * @param {Object} correctQuestion - Correct answer
+		 * @param {Object} config - Quiz configuration
+		 * @param {HTMLElement} button - Clicked button
+		 */
+		function selectAnswer(chosenOption, correctQuestion, config, button) {
+			try {
+				const isCorrect = chosenOption[config.matchKey] === correctQuestion[config.matchKey];
+				const optionButtons = config.optionsContainer.querySelectorAll('.option');
+
+				optionButtons.forEach(btn => btn.disabled = true);
+
+				const feedbackEl = document.createElement('div');
+				feedbackEl.className = `feedback ${isCorrect ? 'success' : 'error'}`;
+				feedbackEl.textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect';
+				feedbackEl.setAttribute('role', 'status');
+				config.feedbackContainer.replaceChildren(feedbackEl);
+				button.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+				if (isCorrect) state.score++;
+
+				setTimeout(() => {
+					state.index++;
+					showQuestion();
+				}, CONFIG.FEEDBACK_DELAY_MS);
+			} catch (error) {
+				console.error('Error selecting answer:', error);
+			}
+		}
+
+		// ========== Sentence Builder ==========
+
+		/**
+		 * Start sentence builder practice
+		 */
+		function startSentenceBuilder() {
+			try {
+				resetState();
+				state.quizType = 'builder';
+				state.questions = shuffle(sentences);
+				state.hasScore = false;
+				showSentenceBuilderCard();
+				showScreen('sentenceBuilderScreen');
+			} catch (error) {
+				console.error('Error starting sentence builder:', error);
+			}
+		}
+
+		/**
+		 * Show current sentence builder card
+		 */
+		function showSentenceBuilderCard() {
+			try {
+				if (state.index >= state.questions.length) {
+					showScreen('mainMenu');
+					return;
+				}
+
+				const sentence = state.questions[state.index];
+				updateProgress(state.index + 1, state.questions.length, DOM.sentenceBuilderProgress);
+
+				DOM.sentenceDisplay.textContent = sentence.chinese;
+				DOM.pinyinDisplay.textContent = sentence.pinyin;
+				DOM.englishDisplay.textContent = `Meaning: ${sentence.english}`;
+
+				playSentenceAudio(sentence.chinese);
+			} catch (error) {
+				console.error('Error showing sentence builder card:', error);
+			}
+		}
+
+		/**
+		 * Advance to next sentence
+		 */
+		function advanceSentenceBuilder() {
 			state.index++;
-			showQuestion();
-		}, FEEDBACK_DELAY_MS);
-	}
-
-	// ---------- Sentence Builder (self-paced practice, no scoring) ----------
-	function startSentenceBuilder() {
-		state.quizType = 'builder';
-		state.questions = shuffle(sentences);
-		state.index = 0;
-		state.hasScore = false;
-		showSentenceBuilderCard();
-		showScreen('sentenceBuilderScreen');
-	}
-
-	function showSentenceBuilderCard() {
-		if (state.index >= state.questions.length) {
-			showScreen('practiceCompleteScreen');
-			return;
+			showSentenceBuilderCard();
 		}
 
-		const sentence = state.questions[state.index];
-		updateProgress(state.index + 1, state.questions.length, 'sentenceBuilderProgress');
+		// ========== Vocabulary List ==========
 
-		document.getElementById('sentenceDisplay').textContent = sentence.chinese;
-		document.getElementById('pinyinDisplay').textContent = sentence.pinyin;
-		document.getElementById('englishDisplay').textContent = sentence.english;
+		/**
+		 * Show vocabulary list
+		 */
+		function showVocabulary() {
+			try {
+				DOM.vocabList.replaceChildren();
 
-		playSentenceAudio(sentence.chinese);
-	}
+				vocabulary.forEach(v => {
+					const item = document.createElement('button');
+					item.className = 'vocab-item';
+					item.type = 'button';
+					item.setAttribute('role', 'listitem');
+					item.innerHTML = `
+						<div class="vocab-item-content">
+							<div class="vocab-chinese">${v.chinese}</div>
+							<div class="vocab-pinyin">${v.pinyin}</div>
+							<div class="vocab-english">${v.english}</div>
+						</div>
+					`;
+					item.addEventListener('click', () => playSingle(getAudioPath(v.pinyinFile), item));
+					DOM.vocabList.appendChild(item);
+				});
 
-	function advanceSentenceBuilder() {
-		state.index++;
-		showSentenceBuilderCard();
-	}
+				showScreen('vocabularyScreen');
+			} catch (error) {
+				console.error('Error showing vocabulary:', error);
+			}
+		}
 
-	// ---------- Vocabulary list ----------
-	function showVocabulary() {
-		const list = document.getElementById('vocabList');
-		clearChildren(list);
+		// ========== Results ==========
 
-		vocabulary.forEach(v => {
-			const item = document.createElement('button');
-			item.className = 'vocab-item';
-			item.innerHTML = `
-				<div class="vocab-chinese">${v.chinese}</div>
-				<div class="vocab-pinyin">${v.pinyin}</div>
-				<div class="vocab-english">${v.english}</div>
-			`;
-			item.addEventListener('click', () => playSingle(getAudioPath(v.pinyinFile)));
-			list.appendChild(item);
+		/**
+		 * Show results screen
+		 */
+		function showResults() {
+			try {
+				const percentage = Math.round((state.score / state.questions.length) * 100);
+				DOM.scoreDisplay.textContent = `${state.score} / ${state.questions.length}`;
+				DOM.resultsDetail.textContent = `Score: ${percentage}%`;
+				showScreen('resultsScreen');
+			} catch (error) {
+				console.error('Error showing results:', error);
+			}
+		}
+
+		// ========== Navigation ==========
+
+		/**
+		 * Return to main menu
+		 */
+		function returnToMenu() {
+			resetState();
+			showScreen('mainMenu');
+		}
+
+		/**
+		 * Replay current question audio
+		 */
+		function replayCurrentAudio() {
+			try {
+				const question = state.questions[state.index];
+				if (!question) return;
+
+				if (state.quizType === 'sentence' || state.quizType === 'builder') {
+					playSentenceAudio(question.chinese);
+				} else if (state.quizType === 'fillblank') {
+					playSentenceAudio(question.fullSentence);
+				} else {
+					playSingle(getAudioPath(question.pinyinFile));
+				}
+			} catch (error) {
+				console.error('Error replaying audio:', error);
+			}
+		}
+
+		// ========== Event Handling ==========
+
+		const ACTIONS = {
+			'start-character-quiz': () => startQuiz('character', vocabulary),
+			'start-reverse-quiz': () => startQuiz('reverse', vocabulary),
+			'start-sentence-quiz': () => startQuiz('sentence', sentences),
+			'start-fillblank-quiz': () => startQuiz('fillblank', generateFillBlankQuestions(sentences)),
+			'start-sentence-builder': startSentenceBuilder,
+			'show-vocabulary': showVocabulary,
+			'return-to-menu': returnToMenu,
+			'replay-audio': replayCurrentAudio,
+			'next-sentence': advanceSentenceBuilder
+		};
+
+		/**
+		 * Handle delegated click events
+		 */
+		document.addEventListener('click', event => {
+			try {
+				const trigger = event.target.closest('[data-action]');
+				if (!trigger) return;
+
+				const action = trigger.dataset.action;
+				const handler = ACTIONS[action];
+
+				if (handler) {
+					handler();
+				} else {
+					console.warn(`Unknown action: ${action}`);
+				}
+			} catch (error) {
+				console.error('Error handling action:', error);
+			}
 		});
 
-		showScreen('vocabularyScreen');
-	}
+		// ========== Initialization ==========
 
-	// ---------- Results ----------
-	function showResults() {
-		const percentage = Math.round((state.score / state.questions.length) * 100);
-		document.getElementById('scoreDisplay').textContent = `${state.score} / ${state.questions.length}`;
-		document.getElementById('resultsDetail').textContent = `Score: ${percentage}%`;
-		showScreen('resultsScreen');
-	}
+		/**
+		 * Initialize application
+		 */
+		function init() {
+			try {
+				showScreen('mainMenu');
+				console.log('Application initialized successfully');
+			} catch (error) {
+				console.error('Error initializing application:', error);
+			}
+		}
 
-	function returnToMenu() {
-		state.quizType = null;
-		state.questions = [];
-		state.index = 0;
-		state.score = 0;
-		showScreen('mainMenu');
-	}
-
-	// ---------- Action routing ----------
-	// One delegated listener maps data-action attributes to handlers, instead
-	// of inline onclick="" attributes scattered through the markup.
-	const ACTIONS = {
-		'start-character-quiz': () => startQuiz('character', vocabulary),
-		'start-reverse-quiz': () => startQuiz('reverse', vocabulary),
-		'start-sentence-quiz': () => startQuiz('sentence', sentences),
-		'start-fillblank-quiz': () => startQuiz('fillblank', generateFillBlankQuestions(sentences)),
-		'start-sentence-builder': startSentenceBuilder,
-		'show-vocabulary': showVocabulary,
-		'return-to-menu': returnToMenu,
-		'replay-audio': replayCurrentAudio,
-		'next-sentence': advanceSentenceBuilder
-	};
-
-	document.addEventListener('click', event => {
-		const trigger = event.target.closest('[data-action]');
-		if (!trigger) return;
-		const handler = ACTIONS[trigger.dataset.action];
-		if (handler) handler();
-	});
-
-	window.addEventListener('load', () => showScreen('mainMenu'));
+		// Start app when DOM is ready
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', init);
+		} else {
+			init();
+		}
 	</script>
 </body>
 </html>
