@@ -740,11 +740,16 @@
 
 		// ========== Data ==========
 		const vocabulary = [
+			{ chinese: '吃', pinyin: 'chī', english: 'Eat / Consume ', pinyinFile: '4/43/Zh-ch%C4%AB' },
 			{ chinese: '的', pinyin: 'de', english: '(Possessive particle)', pinyinFile: '0/0d/Zh-de' },
+			{ chinese: '家', pinyin: 'jiā', english: 'Home / Family / Household', pinyinFile: '1/1c/Zh-ji%C4%81' },
 			{ chinese: '好', pinyin: 'hǎo', english: 'Good / Well / Fine', pinyinFile: '2/22/Zh-h%C7%8Eo' },
+			{ chinese: '喝', pinyin: 'hē', english: 'Drink', pinyinFile: '6/6f/Zh-h%C4%93' },
 			{ chinese: '很', pinyin: 'hěn', english: 'Very / Quite', pinyinFile: 'd/df/Zh-h%C4%9Bn' },
+			{ chinese: '了', pinyin: 'le', english: '(Completed action marker / Change of state particle)', pinyinFile: '3/3c/Zh-le' },
 			{ chinese: '里', pinyin: 'lǐ', english: 'Inside / Interior / Within', pinyinFile: 'b/b5/Zh-l%C7%90' },
 			{ chinese: '吗', pinyin: 'ma', english: '(Question particle)', pinyinFile: '3/37/Zh-ma' },
+			{ chinese: '呢', pinyin: 'ne', english: '(Question particle for topics already mentioned)', pinyinFile: 'f/f8/Zh-ne' },
 			{ chinese: '你', pinyin: 'nǐ', english: 'You (Singular)', pinyinFile: '7/73/Zh-n%C7%90' },
 			{ chinese: '我', pinyin: 'wǒ', english: 'I / Me / My', pinyinFile: '4/42/Zh-w%C7%92' },
 			{ chinese: '想', pinyin: 'xiǎng', english: 'Think / Want / Miss / Wish', pinyinFile: '0/04/Zh-xi%C7%8Eng' },
@@ -758,9 +763,14 @@
 			{ chinese: '你好！', pinyin: 'nǐ hǎo!', english: 'Hello!' },
 			{ chinese: '你好吗？', pinyin: 'nǐ hǎo ma?', english: 'How are you?' },
 			{ chinese: '你很好！', pinyin: 'nǐ hěn hǎo!', english: 'You are good! / You are a good person!' },
+			{ chinese: '你呢？', pinyin: 'nǐ ne?', english: 'And you? / What about you?' },
+			{ chinese: '你想吃吗？', pinyin: 'nǐ xiǎng chī ma?', english: 'Do you want to eat?' },
+			{ chinese: '你想喝吗？', pinyin: 'nǐ xiǎng hē ma?', english: 'Do you want to drink?' },
 			{ chinese: '你在这里吗？', pinyin: 'nǐ zài zhè lǐ ma?', english: 'Are you here?' },
+			{ chinese: '我喝了！', pinyin: 'wǒ hē le!', english: 'I drank (it)!' },
 			{ chinese: '我很好！', pinyin: 'wǒ hěn hǎo!', english: 'I am good! / I am doing well!' },
 			{ chinese: '我想你。', pinyin: 'wǒ xiǎng nǐ.', english: 'I miss you. / I think about you.' },
+			{ chinese: '我在家。', pinyin: 'wǒ zài jiā.', english: 'I am at home.' },
 			{ chinese: '我在这里。', pinyin: 'wǒ zài zhè lǐ.', english: 'I am here.' },
 			{ chinese: '这很好。', pinyin: 'zhè hěn hǎo.', english: 'This is very good.' }
 		];
@@ -1086,7 +1096,7 @@
 				if (state.quizType === 'fillblank') {
 					DOM.fillBlankSentence.textContent = question.sentence;
 					DOM.fillBlankPinyin.textContent = question.pinyinWithBlank;
-					DOM.fillBlankEnglish.textContent = `Meaning: ${question.english}`;
+					DOM.fillBlankEnglish.textContent = `${question.english}`;
 
 					const correctAnswer = config.pool.find(v => v.chinese === question.blank);
 					const options = buildOptions(correctAnswer, config.pool, config.matchKey);
@@ -1190,7 +1200,7 @@
 
 				DOM.sentenceDisplay.textContent = sentence.chinese;
 				DOM.pinyinDisplay.textContent = sentence.pinyin;
-				DOM.englishDisplay.textContent = `Meaning: ${sentence.english}`;
+				DOM.englishDisplay.textContent = `${sentence.english}`;
 
 				playSentenceAudio(sentence.chinese);
 			} catch (error) {
