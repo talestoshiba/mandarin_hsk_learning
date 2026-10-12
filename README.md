@@ -34,7 +34,7 @@ https://talestoshiba.github.io/mandarin_hsk_learning/index.html
 ## Current Vocabulary
 
 **HSK Level 1** — 150 characters minimum requirement. This app currently includes a curated subset:
-- Common characters (的, 好, 很, 里, 吗, 你, 我, 想, 在, and 这);
+- Common characters (吃, 的, 家, 好, 喝, 很, 了, 里, 吗, 呢, 你, 我, 想, 在, and 这);
 - Essential sentences for beginners;
 - Audio from Wikimedia Commons.
 
